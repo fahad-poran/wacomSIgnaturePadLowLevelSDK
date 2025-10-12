@@ -1,0 +1,79 @@
+# 🧹 Visual Studio and .NET ignore rules
+
+# Build Folders
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio folder
+.vs/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.cache
+*.pdb
+*.dbmdl
+
+# Auto-generated files
+*.DesignTimeResolveAssemblyReferences.cache
+*.DesignTimeResolveAssemblyReferencesInput.cache
+*.FileListAbsolute.txt
+
+# Backup & publish files
+*.bak
+*.Backup
+*.Publish.xml
+
+# NuGet packages
+*.nupkg
+packages/
+.nuget/
+
+# Build results
+*.exe
+*.dll
+
+# Debug and release folders
+Debug/
+Release/
+x64/
+x86/
+
+# Rider / ReSharper / VS Code / JetBrains
+.idea/
+.vscode/
+_ReSharper*/
+*.DotSettings.user
+
+# Windows image cache / thumbnails
+Thumbs.db
+ehthumbs.db
+
+# System files
+.DS_Store
+desktop.ini
+
+# Ignore config secrets but keep project configs
+# Keep app.config and app.manifest for build
+!app.config
+!app.manifest
+
+# Ignore local publish profiles
+Properties/PublishProfiles/
+
+# Optional: if you use SigCaptX locally
+SigCaptXTemp/
+SigDataCache/
+
+# Keep main project files
+!DemoButtons.sln
+!DemoButtons.csproj
+!*.cs
+!*.resx

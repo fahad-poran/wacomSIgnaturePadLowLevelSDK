@@ -37,80 +37,91 @@ namespace DemoButtons
         {
             InitializeComponent();
             uiHelper = new UIHelper(this, dbConn, lblStatus);
+            idcardno.KeyDown += textBox1_KeyDown;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // First, ask for employee ID card number and get full name
-            string employeeFullName = ValidateEmployeeId();
+            if (string.IsNullOrWhiteSpace(currentEmployeeId))
+            {
+                MessageBox.Show("Please enter Employee ID Card Number before capturing signature.",
+                                "Missing ID", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            string employeeFullName = CheckEmployeeInDatabase(currentEmployeeId);
 
             if (!string.IsNullOrEmpty(employeeFullName))
             {
-                // If employee exists and we got the full name, proceed with signature capture
                 CaptureSignature(employeeFullName);
             }
-        }
-
-        private string ValidateEmployeeId()
-        {
-            using (var inputForm = new Form())
+            else
             {
-                inputForm.Text = "Employee Verification";
-                inputForm.Size = new Size(300, 150);
-                inputForm.StartPosition = FormStartPosition.CenterParent;
-                inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
-                inputForm.MaximizeBox = false;
-                inputForm.MinimizeBox = false;
-
-                var lblInstruction = new Label()
-                {
-                    Text = "Enter Employee ID Card Number:",
-                    Location = new Point(10, 10),
-                    Size = new Size(250, 20),
-                    Font = new Font("Arial", 9)
-                };
-
-                var txtIdCard = new TextBox()
-                {
-                    Location = new Point(10, 35),
-                    Size = new Size(250, 20),
-                    Font = new Font("Arial", 10)
-                };
-
-                var btnOk = new Button()
-                {
-                    Text = "OK",
-                    Location = new Point(100, 65),
-                    Size = new Size(75, 25),
-                    DialogResult = DialogResult.OK
-                };
-
-                var btnCancel = new Button()
-                {
-                    Text = "Cancel",
-                    Location = new Point(180, 65),
-                    Size = new Size(75, 25),
-                    DialogResult = DialogResult.Cancel
-                };
-
-                inputForm.Controls.AddRange(new Control[] { lblInstruction, txtIdCard, btnOk, btnCancel });
-                inputForm.AcceptButton = btnOk;
-                inputForm.CancelButton = btnCancel;
-
-                if (inputForm.ShowDialog() == DialogResult.OK)
-                {
-                    if (string.IsNullOrWhiteSpace(txtIdCard.Text))
-                    {
-                        MessageBox.Show("Please enter Employee ID Card Number.");
-                        return null;
-                    }
-
-                    currentEmployeeId = txtIdCard.Text.Trim();
-                    return CheckEmployeeInDatabase(currentEmployeeId);
-                }
+                MessageBox.Show("Employee ID not found. Please check and try again.",
+                                "Validation Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            return null;
         }
+
+        //private string ValidateEmployeeId()
+        //{
+        //    using (var inputForm = new Form())
+        //    {
+        //        inputForm.Text = "Employee Verification";
+        //        inputForm.Size = new Size(300, 150);
+        //        inputForm.StartPosition = FormStartPosition.CenterParent;
+        //        inputForm.FormBorderStyle = FormBorderStyle.FixedDialog;
+        //        inputForm.MaximizeBox = false;
+        //        inputForm.MinimizeBox = false;
+
+        //        var lblInstruction = new Label()
+        //        {
+        //            Text = "Enter Employee ID Card Number:",
+        //            Location = new Point(10, 10),
+        //            Size = new Size(250, 20),
+        //            Font = new Font("Arial", 9)
+        //        };
+
+        //        var txtIdCard = new TextBox()
+        //        {
+        //            Location = new Point(10, 35),
+        //            Size = new Size(250, 20),
+        //            Font = new Font("Arial", 10)
+        //        };
+
+        //        var btnOk = new Button()
+        //        {
+        //            Text = "OK",
+        //            Location = new Point(100, 65),
+        //            Size = new Size(75, 25),
+        //            DialogResult = DialogResult.OK
+        //        };
+
+        //        var btnCancel = new Button()
+        //        {
+        //            Text = "Cancel",
+        //            Location = new Point(180, 65),
+        //            Size = new Size(75, 25),
+        //            DialogResult = DialogResult.Cancel
+        //        };
+
+        //        inputForm.Controls.AddRange(new Control[] { lblInstruction, txtIdCard, btnOk, btnCancel });
+        //        inputForm.AcceptButton = btnOk;
+        //        inputForm.CancelButton = btnCancel;
+
+        //        if (inputForm.ShowDialog() == DialogResult.OK)
+        //        {
+        //            if (string.IsNullOrWhiteSpace(txtIdCard.Text))
+        //            {
+        //                MessageBox.Show("Please enter Employee ID Card Number.");
+        //                return null;
+        //            }
+
+        //            currentEmployeeId = txtIdCard.Text.Trim();
+        //            return CheckEmployeeInDatabase(currentEmployeeId);
+        //        }
+        //    }
+        //    return null;
+        //}
 
         private string CheckEmployeeInDatabase(string idCardNo)
         {
@@ -178,9 +189,6 @@ namespace DemoButtons
 
                 if (penData != null || penTimeData != null)
                 {
-                    // Display pen count
-                    txtPenDataCount.Text = (penData != null ? penData.Count : penTimeData.Count).ToString();
-
                     // Draw smooth signature and save
                     string savedFilePath = SaveSignatureAsImage(penData, penTimeData, demo.getCapability());
 
@@ -188,6 +196,12 @@ namespace DemoButtons
                     if (!string.IsNullOrEmpty(savedFilePath))
                     {
                         UpdateSignaturePathInDatabase(currentEmployeeId, savedFilePath);
+                        idcardno.Text = string.Empty;
+                        currentEmployeeId = string.Empty;
+
+                        // Optional: Give a visual confirmation
+                        lblStatus.Text = "✅Captured successfully! for " +employeeFullName;
+                        lblStatus.ForeColor = Color.DarkGreen;
                     }
                 }
 
@@ -290,7 +304,7 @@ namespace DemoButtons
                     System.IO.Directory.CreateDirectory(signaturesFolder);
 
                 // Save with employee ID in filename
-                string fileName = $"{currentEmployeeId}";
+                string fileName = $"{currentEmployeeId}.png";
                 string filePath = System.IO.Path.Combine(signaturesFolder, fileName);
 
                 bmp.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
@@ -394,7 +408,7 @@ namespace DemoButtons
             try
             {
                 // Initialize UI
-                uiHelper.InitializeUI(button1, txtPenDataCount);
+                uiHelper.InitializeUI(button1);
                 uiHelper.SetVersionInfo();
 
                 // Update status immediately to test connection
@@ -451,5 +465,36 @@ namespace DemoButtons
 
             button1.Enabled = dbConnected && deviceConnected;
         }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            currentEmployeeId = idcardno.Text.Trim();
+
+            if (currentEmployeeId.Length >= 5) // example condition
+            {
+                string name = CheckEmployeeInDatabase(currentEmployeeId);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    lblStatus.Text = $"Employee Found: {name}";
+                    lblStatus.ForeColor = Color.Green;
+                }
+                else
+                {
+                    lblStatus.Text = "Employee Not Found";
+                    lblStatus.ForeColor = Color.Red;
+                }
+            }
+        }
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                lblStatus.Text = "Processing...";
+                lblStatus.ForeColor = Color.Blue;
+                button1.PerformClick();
+            }
+        }
+
     }
 }

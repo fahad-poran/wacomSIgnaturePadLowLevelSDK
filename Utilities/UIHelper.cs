@@ -21,28 +21,16 @@ namespace DemoButtons.Utilities
             statusLabel = statusLabelControl;
         }
 
-        public void InitializeUI(Button captureButton, TextBox penDataTextBox)
+        public void InitializeUI(Button captureButton)
         {
             // Set up better button appearance
             if (captureButton != null)
             {
-                captureButton.Text = "Capture Signature";
-                //captureButton.BackColor = Color.DeepSkyBlue;
                 captureButton.ForeColor = Color.White;
                 captureButton.FlatStyle = FlatStyle.Flat;
                 captureButton.FlatAppearance.BorderSize = 0;
                 captureButton.Font = new Font("Segoe UI", 10, FontStyle.Bold);
                 captureButton.Height = 40;
-            }
-
-            
-            // Set up label for pen data count
-            if (penDataTextBox != null)
-            {
-                penDataTextBox.BackColor = Color.White;
-                penDataTextBox.BorderStyle = BorderStyle.FixedSingle;
-                penDataTextBox.Font = new Font("Consolas", 9);
-                penDataTextBox.ForeColor = Color.DarkBlue;
             }
 
             // Set form background
